@@ -1,35 +1,167 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 int extraMemoryAllocated;
+
+void merge(int pData[], int l, int m, int r);
 
 // implement merge sort
 // extraMemoryAllocated counts bytes of extra memory allocated
 void mergeSort(int pData[], int l, int r)
 {
-	
+	if (l < r)
+	{
+		// get the mid point
+		int m = (l+r)/2;
+
+		// Memory allocated for one int variable.
+		extraMemoryAllocated = sizeof(m);
+
+		// Sort first and second halves
+		mergeSort(pData, l, m);
+		mergeSort(pData, m+1, r);
+		// printf("Testing l=%d r=%d m=%d\n", l, r, m);
+		merge(pData, l, m, r);
+	}
+}
+
+void merge(int pData[], int l, int m, int r)
+{
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 =  r - m;
+
+	// Memory allocated for five more int variables.
+	extraMemoryAllocated += sizeof(i) + sizeof(j) + sizeof(k) + sizeof(n1) + sizeof(n2);
+
+    /* create temp arrays */
+    int *L = (int*) malloc(n1*sizeof(int));
+    int *R = (int*) malloc(n2*sizeof(int));
+
+	extraMemoryAllocated += 2 * sizeof(int*) + sizeof(n1* sizeof(int)) + sizeof(n2* sizeof(int));
+
+    /* Copy data to temp arrays L[] and R[] */
+    for (i = 0; i < n1; i++)
+        L[i] = pData[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = pData[m + 1+ j];
+
+    /* Merge the temp arrays back into arr[l..r]*/
+    i = 0; // Initial index of first subarray
+    j = 0; // Initial index of second subarray
+    k = l; // Initial index of merged subarray
+    while (i < n1 && j < n2)
+    {
+        if (L[i] <= R[j])
+        {
+            pData[k] = L[i];
+            i++;
+        }
+        else
+        {
+            pData[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    /* Copy the remaining elements of L[], if there
+       are any */
+    while (i < n1)
+    {
+        pData[k] = L[i];
+        i++;
+        k++;
+    }
+
+    /* Copy the remaining elements of R[], if there
+       are any */
+    while (j < n2)
+    {
+        pData[k] = R[j];
+        j++;
+        k++;
+    }
+    free(L);
+    free(R);
 }
 
 // implement insertion sort
 // extraMemoryAllocated counts bytes of memory allocated
 void insertionSort(int* pData, int n)
 {
-	
+	int i, item, j;
+
+	// Memory allocated for three int variables.
+	extraMemoryAllocated = sizeof(i) + sizeof(j) + sizeof(item);
+
+	for (i = 1; i < n; i++)
+	{
+		item = pData[i];
+
+		/* Move elements of arr[0..i-1], that are
+		greater than key, to one position ahead
+		of their current position */
+		for(j=i-1; j>=0; j--)
+		{
+			if(pData[j]>item)
+				pData[j+1] = pData[j];
+			else
+				break;
+		}
+
+		pData[j+1] = item;
+	}
 }
 
 // implement bubble sort
 // extraMemoryAllocated counts bytes of extra memory allocated
 void bubbleSort(int* pData, int n)
 {
-	
+	int i, j, temp;
+
+	// Memory allocated for three int variables.
+	extraMemoryAllocated = sizeof(i) + sizeof(j) + sizeof(temp);
+
+	for (i = 0; i < n-1; i++)
+	{
+		for (j = 0; j < n-i-1; j++)
+		{
+			if (pData[j] > pData[j+1])
+			{
+				temp=pData[j];
+				pData[j]=pData[j+1];
+				pData[j+1]=temp;
+			}
+		}
+	}
 }
 
 // implement selection sort
 // extraMemoryAllocated counts bytes of extra memory allocated
 void selectionSort(int* pData, int n)
 {
-	
+	int i, j, min_idx, temp;
+
+	// Memory allocated for four int variables.
+	extraMemoryAllocated = sizeof(i) + sizeof(j) + sizeof(min_idx) + sizeof(temp);
+
+	// One by one move boundary of unsorted subarray
+	for (i = 0; i < n-1; i++)
+	{
+		// Find the minimum element in unsorted array
+		min_idx = i;
+
+		for (j = i+1; j < n; j++)
+			if (pData[j] < pData[min_idx])
+				min_idx = j;
+		// Swap the found minimum element with the first element
+		temp = pData[i];
+		pData[i] = pData[min_idx];
+		pData[min_idx] = temp;
+	}
 }
 
 // parses input file to an integer array
@@ -44,7 +176,13 @@ int parseData(char *inputFileName, int **ppData)
 		fscanf(inFile,"%d\n",&dataSz);
 		*ppData = (int *)malloc(sizeof(int) * dataSz);
 		// Implement parse data block
+		for (int i = 0; i < dataSz; i++)
+		{
+			fscanf(inFile, "%d", (*(ppData)) + i);
+		}
 	}
+
+	fclose(inFile);
 	
 	return dataSz;
 }
