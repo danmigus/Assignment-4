@@ -15,9 +15,6 @@ void mergeSort(int pData[], int l, int r)
 	{
 		int m = (l+r)/2;
 
-		// Memory allocated for one int variable.
-		extraMemoryAllocated = sizeof(m);
-
 		mergeSort(pData, l, m);
 		mergeSort(pData, m+1, r);
 
